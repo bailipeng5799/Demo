@@ -12,13 +12,8 @@ import (
 
 //学员根据地址查询驾校
 func StudentsCheckSchoolByAddress(c *gin.Context){
-	var address model.Common
-	if err := c.ShouldBind(&address);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	fmt.Println(address)
-	allschool,err:=dao.StudentCheckSchoolByAddress(address.Strings)
+	address := c.Query("address")
+	allschool,err:=dao.StudentCheckSchoolByAddress(address)
 	if err!=nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
 		return
@@ -27,13 +22,8 @@ func StudentsCheckSchoolByAddress(c *gin.Context){
 }
 //学员根据驾校名字查询驾校
 func StudentCheckSchoolByName(c *gin.Context){
-	var schoolname model.Common
-	if err := c.ShouldBind(&schoolname);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	fmt.Println(schoolname)
-	allschool,err := dao.StudentCheckSchoolByName(schoolname.Strings)
+	schoolname := c.Query("schoolname")
+	allschool,err := dao.StudentCheckSchoolByName(schoolname)
 	if err!=nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
 		return
@@ -42,13 +32,8 @@ func StudentCheckSchoolByName(c *gin.Context){
 }
 //顺序练习
 func OrderToPractice(c *gin.Context){
-	var object model.Common
-	if err := c.ShouldBind(&object);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	fmt.Println(object)
-	topics,err := dao.StudentOrderByObject(object.Strings)
+	subject := c.Query("subject")
+	topics,err := dao.StudentOrderByObject(subject)
 	if err != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
 		return
@@ -58,10 +43,8 @@ func OrderToPractice(c *gin.Context){
  //专项练习
 func SpecialPractice(c *gin.Context){
  	var temp model.Special
- 	if err := c.ShouldBind(&temp);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
- 		return
-	}
+	temp.Variety = c.Query("variety")
+	temp.Subject = c.Query("subject")
  	fmt.Println(temp)
  	topics,err := dao.StudentSpecialByObject(temp.Subject,temp.Variety)
  	if err!=nil{
@@ -73,13 +56,14 @@ func SpecialPractice(c *gin.Context){
 }
 //判断选择一起科目一
 func SimulationTestOne(c *gin.Context){
-	var subject model.Common
-	if err := c.ShouldBind(&subject);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	topics,err := dao.StudentJudgeTest40(subject.Strings)
-	temp,err2 := dao.StudentSelectTest60(subject.Strings)
+	//var subject model.Common
+	//if err := c.ShouldBind(&subject);err != nil{
+	//	common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
+	//	return
+	//}
+	subject := c.Query("subject")
+	topics,err := dao.StudentJudgeTest40(subject)
+	temp,err2 := dao.StudentSelectTest60(subject)
 	topics =append(topics,temp...)
 	if err != nil || err2 != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
@@ -89,13 +73,9 @@ func SimulationTestOne(c *gin.Context){
 }
 //模拟考试科目四
 func SimulationTestFour(c *gin.Context){
-	var subject model.Common
-	if err := c.ShouldBind(&subject);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}//科目几
-	topics,err := dao.StudentJudgeTest20(subject.Strings)
-	temp,err2 := dao.StudentSelectTest30(subject.Strings)
+	subject := c.Query("subject")
+	topics,err := dao.StudentJudgeTest20(subject)
+	temp,err2 := dao.StudentSelectTest30(subject)
 	topics =append(topics,temp...)
 	if err != nil || err2 != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
@@ -120,12 +100,8 @@ func MyfavoriteAdd(c *gin.Context){
 }
 //我的收藏得到userid
 func MyFavorite(c *gin.Context){
-	var Id model.Common
-	if err := c.ShouldBind(&Id);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	topics,err :=dao.MyFavorite(Id.Id)
+	id := c.Query("id")
+	topics,err :=dao.MyFavorite(id)
 	if err != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
 		return
@@ -213,12 +189,8 @@ func MyTestSubmit(c *gin.Context){
 }
 //获取考试记录
 func MyTest(c *gin.Context){
-	var id model.Common
-	if err :=c.ShouldBind(&id);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	alltest,err:=dao.AllTest(id.Id)
+	id := c.Query("id")
+	alltest,err:=dao.AllTest(id)
 	if err!=nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err" : model.ErrorDBError.Error})
 		return
@@ -228,12 +200,13 @@ func MyTest(c *gin.Context){
 //播放视频的请求
 func PracticeVideo(c *gin.Context){
 	var video model.Video
-	//先根据练习名称获取视频相关信息
-	if err := c.ShouldBind(&video.PracticeName);err != nil{
-		log.Printf("PracticeName for failure err:%v",err)
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Error":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
+	video.PracticeName = c.Query("practicename")
+	////先根据练习名称获取视频相关信息
+	//if err := c.ShouldBind(&video.PracticeName);err != nil{
+	//	log.Printf("PracticeName for failure err:%v",err)
+	//	common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Error":model.ErrorRequestBodyParseFailed.Error})
+	//	return
+	//}
 	video.VideoName,_ = dao.CheckVideoName(video.PracticeName)
 	c.Header("Content-Type","video/mp4")
 	filepath := fmt.Sprintf("G:/goproject/src/jxbdproject/photo/%s",video.VideoName)

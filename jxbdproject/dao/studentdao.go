@@ -176,7 +176,7 @@ func AddFavorite(userid int,topicid int)error{
 }
 //根据id查找题目
 func CheckTopicByid(id int)*model.Topic{
-	sqlStr := "select *from topic where id = ?"
+	sqlStr := "select *from question_bank where id = ?"
 	row := common.Db.QueryRow(sqlStr,id)
 	var topic model.Topic
 	row.Scan(&topic.Id,&topic.Question,&topic.A,&topic.B,&topic.C,&topic.D,&topic.Photo,&topic.Answer,&topic.Variety,&topic.Kind,&topic.Subject)
@@ -184,7 +184,7 @@ func CheckTopicByid(id int)*model.Topic{
 
 }
 //我的收藏
-func MyFavorite(id int)([]*model.Topic,error){
+func MyFavorite(id string)([]*model.Topic,error){
 	sqlStr := "select favorite from user_favquestion where userid = ?"
 	rows,err := common.Db.Query(sqlStr,id)
 	defer rows.Close()
@@ -272,7 +272,7 @@ func SubmitTest(mytest model.Mytest)error{
 	return nil
 }
 //获取所有考试
-func AllTest(userid int)([]*model.Mytest,error){
+func AllTest(userid string)([]*model.Mytest,error){
 	sqlStr := "select * from test where userid = ?"
 	rows,err := common.Db.Query(sqlStr,userid)
 	defer rows.Close()
@@ -284,7 +284,6 @@ func AllTest(userid int)([]*model.Mytest,error){
 	for rows.Next(){
 		mytest := &model.Mytest{}
 		rows.Scan(&mytest.Testid,&mytest.Userid,&mytest.Subject,&mytest.Score,&mytest.Testtime)
-		fmt.Println(mytest.Testtime)
 		alltest=append(alltest,mytest)
 	}
 	return alltest,nil

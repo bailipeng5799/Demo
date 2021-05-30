@@ -24,7 +24,7 @@ func MasterTopics()([]*model.Topic,error){
 		return topics,nil
 }
 
-func MasterDetailTopic(id int) model.Topic{
+func MasterDetailTopic(id string) model.Topic{
 	sqlStr := "select * from question_bank where id = ?"
 	row := common.Db.QueryRow(sqlStr,id)
 	var topic model.Topic
@@ -36,7 +36,6 @@ func MasterDetailTopic(id int) model.Topic{
 
 //管理员添加习题
 func MasterAddTopic(topic model.Topic) error{
-
 	sqlStr := "insert into question_bank(id,question,a,b,c,d,photo,answer,variety,kind,subject) value (?,?,?,?,?,?,?,?,?,?,?)"
 	_,err := common.Db.Exec(sqlStr,topic.Id,topic.Question,topic.A,topic.B,topic.C,topic.D,topic.Photo,topic.Answer,topic.Variety,topic.Kind,topic.Subject)
 	if err != nil{
@@ -152,7 +151,7 @@ func MasterUpdateDrvingSchool(school model.DrvingSchool)error{
 	return nil
 }
 //管理员根据id查询题目
-func MasterCheckDrvingSchool(id int)model.DrvingSchool{
+func MasterCheckDrvingSchool(id string)model.DrvingSchool{
 	sqlStr := "select * from drving_school where id = ?"
 	row := common.Db.QueryRow(sqlStr,id)
 	var school model.DrvingSchool
@@ -162,7 +161,7 @@ func MasterCheckDrvingSchool(id int)model.DrvingSchool{
 }
 func MasterAddVideo(video model.Video)error{
 	sqlStr := "insert into videos(practicename,videoname) value (?,?)"
-	_,err := common.Db.Exec(sqlStr,video.PracticeName,video.PracticeName)
+	_,err := common.Db.Exec(sqlStr,video.PracticeName,video.VideoName)
 	if err != nil{
 		log.Printf("MasterAddVideo Db err : %v\n",err)
 		return err

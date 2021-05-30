@@ -15,7 +15,7 @@ func SynchroData(){
 //一天刷新一次
 func TickerHandler() {
 	//每隔一天向tk.C发送一个当前时间
-	tk := time.NewTicker(24 * 3600 * time.Second)
+	tk := time.NewTicker(7*24*3600 * time.Second)
 	defer tk.Stop()
 	for{
 		select {

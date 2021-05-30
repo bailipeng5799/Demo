@@ -9,23 +9,20 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 //管理者查询详情
 func  MasterTopicDetail(c *gin.Context){
-	var id model.Common
-	if err := c.ShouldBind(&id);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
+	id := c.Query("id")
 	fmt.Println(id)
-	topic := dao.MasterDetailTopic(id.Id)
+	topic := dao.MasterDetailTopic(id)
 	common.SendNormalResPonse(c,http.StatusOK,gin.H{"Topic":topic})
-
 }
 //管理者添加题目
 func MasterTopicAdd(c *gin.Context){
 	var addtopic model.Topic
-	if err := c.BindJSON(&addtopic);err !=nil{
+	if err := c.ShouldBind(&addtopic);err !=nil{
+		log.Println(err)
 		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
 		return
 	}
@@ -71,12 +68,8 @@ func MasterTopicDelete(c *gin.Context){
 }
 //根据题目信息查询有此关键词的题目
 func MasterTopicCheck(c *gin.Context){
-	var topic model.Topic
-	if err := c.ShouldBind(&topic);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	topics,err:= dao.MasterCheckTopic(topic.Question)
+	question := c.Query("question")
+	topics,err:= dao.MasterCheckTopic(question)
 	if err != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err":model.ErrorDBError.Error})
 		return
@@ -87,10 +80,10 @@ func MasterTopicCheck(c *gin.Context){
 //按照题目分类查找题目
 func MasterTopicCheckByKind(c *gin.Context){
 	var kind model.Topic
-	if err := c.ShouldBind(&kind);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
+	tmp := c.Query("kind")
+	kind.Kind, _=strconv.Atoi(tmp)
+	kind.Variety = c.Query("variety")
+	kind.Subject = c.Query("subject")
 	topics,err := dao.MasterCheckByKindTopic(kind)
 	if err != nil{
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Err":model.ErrorDBError.Error})
@@ -158,42 +151,42 @@ func MasterSchoolUpadate(c *gin.Context){
 	common.SendNormalResPonse(c,http.StatusOK,gin.H{"Allschool":allschool})
 }
 func MasterSchoolCheck(c *gin.Context){
-	var id model.Common
-	if err := c.ShouldBind(&id);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
-	school := dao.MasterCheckDrvingSchool(id.Id)
+	id := c.Query("id")
+	school := dao.MasterCheckDrvingSchool(id)
 	common.SendNormalResPonse(c,http.StatusOK,gin.H{"School":school})
 }
-func MasterUploadVideos(c *gin.Context){
-	var video model.Video
-	if err := c.ShouldBind(&video.PracticeName);err != nil{
-		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
-		return
-	}
+//保存视频到本地
+func MasterUploadVideo(c *gin.Context){
 	file,err := c.FormFile("videofile")
 	if err != nil{
 		log.Printf("Error when try to open file: %v",err)
 		common.SendErrorResponse(c,model.ErrorInternalFaults.HttpSC,gin.H{"Error":model.ErrorInternalFaults.Error})
 	}
 	fmt.Println(file.Filename)
-	video.VideoName=file.Filename
-
 	dst := model.Video_Dir+file.Filename
 	if err := c.SaveUploadedFile(file,dst);err != nil{
-		log.Printf("Video file save error :%v",err)
-		common.SendErrorResponse(c,model.ErrorInternalFaults.HttpSC,gin.H{"Error":model.ErrorInternalFaults.Error})
+		common.SendErrorResponse(c,http.StatusInternalServerError,gin.H{"Message":"服务器保存视频失败"})
+	}
+	//如果保存文件正常返回文件路径将请求头设置为200
+	common.SendNormalResPonse(c,http.StatusOK,gin.H{"message":"upload successfully!","url":dst})
+}
+//上传视频信息
+func MasterUploadVideoDetail(c *gin.Context){
+	var video model.Video
+	if err := c.ShouldBind(&video);err != nil{
+		log.Printf("RequestBodyParseFailed err : %v\n",err)
+		fmt.Println(video.PracticeName,video.VideoName)
+		common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Err":model.ErrorRequestBodyParseFailed.Error})
 		return
 	}
-	err = dao.MasterAddVideo(video)
+	fmt.Println(video)
+	err := dao.MasterAddVideo(video)
 	if err != nil{
 		log.Printf("db err: %v",err)
 		common.SendErrorResponse(c,model.ErrorDBError.HttpSC,gin.H{"Error":model.ErrorDBError})
 		return
 	}
-	//如果保存文件正常返回文件路径将请求头设置为201
-	common.SendNormalResPonse(c,http.StatusCreated,gin.H{"message":"upload successfully!","url":dst})
+	common.SendNormalResPonse(c,http.StatusNoContent,gin.H{"Message":"视频信息上传成功"})
 }
 //删除视频
 func MasterDeleteVideo(c *gin.Context){
