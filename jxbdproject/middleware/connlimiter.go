@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func RateLimitMiddleware()gin.HandlerFunc{
+func RateLimitMiddleware()func(c *gin.Context){
 	limiter := common.NewConnLimiter(2)
 	return func(c *gin.Context) {
 		//如果没拿到token
@@ -16,8 +16,8 @@ func RateLimitMiddleware()gin.HandlerFunc{
 			c.Abort()
 			return
 		}
-		c.Next()
 		//关闭这个请求
 		defer limiter.ReleaseConn()
+		c.Next()
 	}
 }

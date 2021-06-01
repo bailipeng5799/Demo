@@ -201,16 +201,10 @@ func MyTest(c *gin.Context){
 func PracticeVideo(c *gin.Context){
 	var video model.Video
 	video.PracticeName = c.Query("practicename")
-	////先根据练习名称获取视频相关信息
-	//if err := c.ShouldBind(&video.PracticeName);err != nil{
-	//	log.Printf("PracticeName for failure err:%v",err)
-	//	common.SendErrorResponse(c,model.ErrorRequestBodyParseFailed.HttpSC,gin.H{"Error":model.ErrorRequestBodyParseFailed.Error})
-	//	return
-	//}
 	video.VideoName,_ = dao.CheckVideoName(video.PracticeName)
+	//fmt.Println(video.VideoName)
 	c.Header("Content-Type","video/mp4")
-	filepath := fmt.Sprintf("G:/goproject/src/jxbdproject/photo/%s",video.VideoName)
-	c.File(filepath)
+	c.File(video.VideoName)
 }
 //对这个视频创建评论
 func CreateComment(c *gin.Context){

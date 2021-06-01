@@ -37,11 +37,11 @@ type User struct{
 	Email 	 string		`json:"email"`//邮箱
 	Name     string		`json:"name"`//app中所使用的昵称
 }
-type UserFavQuestion struct{
-	Id int	`json:"id"`//id
-	Userid int `json:"userid"`//属于哪个用户
-	Favorite string `json:"favorite"`//收藏题
-}
+//type UserFavQuestion struct{
+//	Id int	`json:"id"`//id
+//	Userid int `json:"userid"`//属于哪个用户
+//	Favorite string `json:"favorite"`//收藏题
+//}
 //计算考试分数的方法
 func(mytest *Mytest)GetTestScore() int{
 	if mytest.Subject=="c1"{
